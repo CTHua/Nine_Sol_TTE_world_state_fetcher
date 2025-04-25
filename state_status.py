@@ -1,17 +1,18 @@
-import datetime
-import random
-import requests
-import os
-import cv2
-import pytesseract
-import discord
-import sqlite3
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
 import asyncio
-import numpy as np
-from dotenv import load_dotenv
-import easyocr
+import datetime
+import os
+import random
+import sqlite3
 import warnings
+
+import cv2
+import discord
+import easyocr
+import numpy as np
+import pytesseract
+import requests
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from dotenv import load_dotenv
 
 # 忽略特定內容的 warning（pin_memory on MPS）
 warnings.filterwarnings("ignore", message="'pin_memory' argument is set as true but not supported on MPS")
