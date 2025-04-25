@@ -20,7 +20,7 @@ warnings.filterwarnings("ignore", message="'pin_memory' argument is set as true 
 
 load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
-CHANNEL_ID = os.getenv("DISCORD_CHANNEL_ID")
+CHANNEL_ID = int(os.getenv("DISCORD_CHANNEL_ID"))
 
 # 連接資料庫（如果檔案不存在會自動建立）
 conn = sqlite3.connect("my_database.db")
