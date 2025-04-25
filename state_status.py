@@ -138,16 +138,20 @@ class MyClient(discord.Client):
     async def read_state_status(self):
         print(f"---- 讀取國家狀態, {datetime.datetime.now()} ----")
         channel = self.get_channel(CHANNEL_ID)  # 將 CHANNEL_ID 替換為目標頻道的 ID
+        state_list = []
         async for message in channel.history(limit=10):
+            # 讀取訊息裡的圖片
+            if message.attachments:
+                url = message.attachments[0].url
+                state = state_name[url.split("/")[-1].split("?")[0]]
+                download_image(url)
+                state_list.append(state)
+        print(f"抓取 {len(state_list)} 張圖片完畢\n-----------")
+        for state in state_list:
             try:
-                # 讀取訊息裡的圖片
-                if message.attachments:
-                    url = message.attachments[0].url
-                    state = state_name[url.split("/")[-1].split("?")[0]]
-                    download_image(url)
-                    state_data = get_state_status(state)
-                    print(f"{state}(影響力: {state_data['influence']}): 活動值: {state_data['activity']}, 軍事值: {state_data['military']}(lv:{state_data['military_lv']}), 貿易值: {state_data['trade']}(lv:{state_data['trade_lv']}), 科技值: {state_data['tech']}(lv:{state_data['tech_lv']}), 文化值: {state_data['culture']}(lv:{state_data['culture_lv']})")
-                    check_and_insert_state_data(state_data)
+                state_data = get_state_status(state)
+                print(f"{state}(影響力: {state_data['influence']}): 活動值: {state_data['activity']}, 軍事值: {state_data['military']}(lv:{state_data['military_lv']}), 貿易值: {state_data['trade']}(lv:{state_data['trade_lv']}), 科技值: {state_data['tech']}(lv:{state_data['tech_lv']}), 文化值: {state_data['culture']}(lv:{state_data['culture_lv']})")
+                check_and_insert_state_data(state_data)
             except Exception as e:
                 print(f"讀取國家狀態時發生錯誤: {e}")
             print("----")
