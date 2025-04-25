@@ -81,21 +81,18 @@ def check_and_insert_state_data(state_data: dict):
     # 如果軍事、貿易、科技、文化或等級其中一項有增長，就更新
     need_update = False
     for key in ["military", "trade", "tech", "culture"]:
-        if latest_data[key] < state_data[key]:
+        if latest_data[key] < state_data[key] and state_data[key] - latest_data[key] < 1000:
             need_update = True
             break
-        elif latest_data[f"{key}_lv"] < state_data[f"{key}_lv"]:
+        elif latest_data[f"{key}_lv"] < state_data[f"{key}_lv"] and state_data[f"{key}_lv"] - latest_data[f"{key}_lv"] < 10:
             need_update = True
             break
-    if latest_data["influence"] < state_data["influence"]:
+    if latest_data["influence"] < state_data["influence"] and state_data["influence"] - latest_data["influence"] < 10:
         need_update = True
-    if latest_data["activity"] != state_data["activity"]:
+    if latest_data["activity"] != state_data["activity"] and abs(state_data["activity"] - latest_data["activity"]) < 100:
         need_update = True
-    random_number = random.randint(0, 1)
-    # 有 50% 的機率強制更新
-    if random_number == 1 or need_update:
-        if need_update:
-            print(f"{state_data['state']} 有增長")
+    if need_update:
+        print(f"{state_data['state']} 有增長")
         cursor.execute("""
         INSERT INTO state_data (state, activity, influence, military, military_lv, trade, trade_lv, tech, tech_lv, culture, culture_lv)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
