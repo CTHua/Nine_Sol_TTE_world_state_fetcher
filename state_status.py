@@ -10,6 +10,12 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 import asyncio
 import numpy as np
 from dotenv import load_dotenv
+import easyocr
+import warnings
+
+# 忽略特定內容的 warning（pin_memory on MPS）
+warnings.filterwarnings("ignore", message="'pin_memory' argument is set as true but not supported on MPS")
+
 
 load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
@@ -160,19 +166,21 @@ def extract_number_from_region(img, x, y, dx, dy):
     # 放大 3 倍
     large_img = cv2.resize(roi, dsize=(0, 0), fx=3, fy=3)
 
-    # 二值化
-    _, thresh = cv2.threshold(large_img, 150, 255, cv2.THRESH_BINARY)
+    # # 二值化
+    # _, thresh = cv2.threshold(large_img, 150, 255, cv2.THRESH_BINARY)
 
-    # 先腐蝕再膨脹（幫助字元分離）
-    kernel = np.ones((2, 2), np.uint8)
-    processed = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel)
+    # # 先腐蝕再膨脹（幫助字元分離）
+    # kernel = np.ones((2, 2), np.uint8)
+    # processed = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel)
 
-    # OCR 辨識（只允許數字、使用單行模式）
-    config = '--psm 7 -c tessedit_char_whitelist=0123456789'
+    # # OCR 辨識（只允許數字、使用單行模式）
+    # config = '--psm 7 -c tessedit_char_whitelist=0123456789'
+    # text = pytesseract.image_to_string(processed, config=config).strip()
 
-    cv2.imwrite(f"./_thresh.png", processed)
-    text = pytesseract.image_to_string(processed, config=config).strip()
-    return text
+    # 使用 EasyOCR 辨識
+    reader = easyocr.Reader(['en'])
+    result = reader.readtext(large_img, detail=0)
+    return result[0]
 
 
 def get_state_status(state: str):
