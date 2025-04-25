@@ -157,11 +157,8 @@ def extract_number_from_region(img, x, y, dx, dy):
     # 擷取 ROI 區域
     roi = img[y:y+dy, x:x+dx]
 
-    # 轉灰階
-    gray = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
-
     # 放大 3 倍
-    large_img = cv2.resize(gray, dsize=(0, 0), fx=3, fy=3)
+    large_img = cv2.resize(roi, dsize=(0, 0), fx=3, fy=3)
 
     # 二值化
     _, thresh = cv2.threshold(large_img, 150, 255, cv2.THRESH_BINARY)
