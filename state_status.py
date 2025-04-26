@@ -133,7 +133,7 @@ class MyClient(discord.Client):
         await self.read_state_status()
         scheduler = AsyncIOScheduler()
         # 十分鐘爬一次
-        scheduler.add_job(self.read_state_status, 'cron', minute='*/10')
+        scheduler.add_job(self.read_state_status, 'cron', minute='*/3')
         scheduler.start()
         await asyncio.Event().wait()  # 保持事件迴圈運行
 
