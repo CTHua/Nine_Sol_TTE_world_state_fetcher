@@ -80,4 +80,12 @@ async def get_state_data_history(state: str):
         ORDER BY updated_at DESC
     """, (state,))
     state_data = cursor.fetchall()
+    # 把 state_data 裡面的 updated_at 改成 UTC+8
+    state_data = [
+        {
+            **row,
+            "updated_at": (datetime.strptime(row["updated_at"], "%Y-%m-%d %H:%M:%S") + timedelta(hours=8)).strftime("%Y-%m-%d %H:%M:%S")
+        }
+        for row in state_data
+    ]
     return state_data
