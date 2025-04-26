@@ -14,6 +14,8 @@ import requests
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from dotenv import load_dotenv
 
+reader = easyocr.Reader(['en'])
+
 # 忽略特定內容的 warning（pin_memory on MPS）
 warnings.filterwarnings("ignore", message="'pin_memory' argument is set as true but not supported on MPS")
 
@@ -183,7 +185,6 @@ def extract_number_from_region(img, x, y, dx, dy):
     # text = pytesseract.image_to_string(processed, config=config).strip()
 
     # 使用 EasyOCR 辨識
-    reader = easyocr.Reader(['en'])
     result = reader.readtext(large_img, detail=0)
     return result[0]
 
