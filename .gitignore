@@ -11,5 +11,4 @@ wheels/
 
 .env*
 test*
-*.db
 state_images/
