@@ -14,10 +14,11 @@ import requests
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from dotenv import load_dotenv
 
-reader = easyocr.Reader(['en'])
+reader = easyocr.Reader(['ch_sim', 'en'])
 
 # 忽略特定內容的 warning（pin_memory on MPS）
-warnings.filterwarnings("ignore", message="'pin_memory' argument is set as true but not supported on MPS")
+warnings.filterwarnings(
+    "ignore", message="'pin_memory' argument is set as true but not supported on MPS")
 
 
 load_dotenv()
@@ -170,39 +171,40 @@ def extract_number_from_region(img, x, y, dx, dy):
     # 擷取 ROI 區域
     roi = img[y:y+dy, x:x+dx]
 
-    # 放大 3 倍
-    large_img = cv2.resize(roi, dsize=(0, 0), fx=3, fy=3)
+    # 放大 5 倍
+    large_img = cv2.resize(roi, dsize=(0, 0), fx=5, fy=5)
 
-    # # 二值化
-    # _, thresh = cv2.threshold(large_img, 150, 255, cv2.THRESH_BINARY)
+    # 二值化
+    _, thresh = cv2.threshold(large_img, 150, 255, cv2.THRESH_BINARY)
 
-    # # 先腐蝕再膨脹（幫助字元分離）
-    # kernel = np.ones((2, 2), np.uint8)
-    # processed = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel)
+    # 腐蝕+膨脹
+    kernel = np.ones((3, 3), np.uint8)
+    thresh = cv2.erode(thresh, kernel, iterations=1)
+    thresh = cv2.dilate(thresh, kernel, iterations=1)
 
-    # # OCR 辨識（只允許數字、使用單行模式）
-    # config = '--psm 7 -c tessedit_char_whitelist=0123456789'
-    # text = pytesseract.image_to_string(processed, config=config).strip()
+    # 使用 EasyOCR 辨識（只允許數字）
+    result = reader.readtext(
+        thresh, detail=0, allowlist='0123456789', low_text=0.1)
 
-    # 使用 EasyOCR 辨識
-    result = reader.readtext(large_img, detail=0)
-    return result[0]
+    if result:
+        return result[0]
+    return None
 
 
 def get_state_status(state: str):
     path = f"./state_images/{state}.png"
     img = cv2.imread(path)
-    for j in range(0, 450):
-        for i in range(0, 800):
-            if img[j, i][0] >= 150 or img[j, i][1] >= 150 or img[j, i][2] >= 150:
-                img[j, i][0] = 255
-                img[j, i][1] = 255
-                img[j, i][2] = 255
-            else:
-                img[j, i][0] = 0
-                img[j, i][1] = 0
-                img[j, i][2] = 0
-    cv2.imwrite(f"./state_images/_{state}_gray.png", img)
+    # for j in range(0, 450):
+    #     for i in range(0, 800):
+    #         if img[j, i][0] >= 150 or img[j, i][1] >= 150 or img[j, i][2] >= 150:
+    #             img[j, i][0] = 255
+    #             img[j, i][1] = 255
+    #             img[j, i][2] = 255
+    #         else:
+    #             img[j, i][0] = 0
+    #             img[j, i][1] = 0
+    #             img[j, i][2] = 0
+    # cv2.imwrite(f"./state_images/_{state}_gray.png", img)
     # 讀取圖片
     activity = extract_number_from_region(img, 483, 100, 107, 36)
     military = extract_number_from_region(img, 485, 161, 106, 46)
@@ -213,7 +215,7 @@ def get_state_status(state: str):
     tech_lv = extract_number_from_region(img, 685, 287, 48, 46)
     culture = extract_number_from_region(img, 485, 349, 106, 46)
     culture_lv = extract_number_from_region(img, 685, 349, 48, 46)
-    influence = extract_number_from_region(img, 85, 288, 52, 50)
+    influence = extract_number_from_region(img, 80, 288, 52, 40)
 
     return {
         "state": state,
